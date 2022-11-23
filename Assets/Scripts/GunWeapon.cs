@@ -1,9 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+public enum EGUN_TYPE
+{
+    HANDGUN,
+    MACHINEGUN
+}
 
 public class GunWeapon : Weapon
-{
+{   
+    [SerializeField] private EGUN_TYPE type;
+
     [SerializeField] Transform bulletPos;
     [SerializeField] Transform bulletCasePos;
 
@@ -12,6 +19,10 @@ public class GunWeapon : Weapon
 
     [SerializeField] int poolNum;
 
+    public EGUN_TYPE Type
+    {
+        get { return type; }
+    }
     public int ReloadAmmo
     {
         get { return reloadAmmo; }

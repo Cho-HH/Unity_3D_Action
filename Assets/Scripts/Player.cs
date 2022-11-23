@@ -12,7 +12,8 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject[] weapons;
     [SerializeField] private GameObject[] grenades;
 
-    [SerializeField] private int totalAmmo;
+    [SerializeField] private int totalHandGunAmmo;
+    [SerializeField] private int totalMachineGunAmmo;
     [SerializeField] private int coin;
     [SerializeField] private int health;
     [SerializeField] private int hasGrenades;
@@ -123,8 +124,8 @@ public class Player : MonoBehaviour
     }
     void Turn()
     {
-        //마우스
-        if (fDown && curEquipWeapon is GunWeapon)
+        //마우스       
+        if (fDown && curEquipWeapon is GunWeapon && !isJump && moveVec == Vector3.zero)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, 100.0f))
@@ -267,13 +268,17 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        
-        if (totalAmmo == 0)
+
+        GunWeapon gun = curEquipWeapon as GunWeapon;
+        if (gun.Type == EGUN_TYPE.HANDGUN && totalHandGunAmmo <= 0)
         {
             return;
         }
+        else if (gun.Type == EGUN_TYPE.MACHINEGUN && totalMachineGunAmmo <= 0)
+        {
+            return;
+        }       
 
-        GunWeapon gun = curEquipWeapon as GunWeapon;
         if (gun.CurAmmo == gun.ReloadAmmo)
         {
             return;
@@ -291,8 +296,20 @@ public class Player : MonoBehaviour
     void ReloadOut()
     {
         GunWeapon gun = curEquipWeapon as GunWeapon;
-        totalAmmo -= (gun.ReloadAmmo - gun.CurAmmo);
-        gun.CurAmmo = gun.ReloadAmmo;
+        int ammo = gun.ReloadAmmo - gun.CurAmmo;
+        int reload = 0;
+        if (gun.Type == EGUN_TYPE.HANDGUN)
+        {
+            reload = Mathf.Min(totalHandGunAmmo, ammo) ;
+            totalHandGunAmmo -= reload;
+            
+        }
+        else if (gun.Type == EGUN_TYPE.MACHINEGUN)
+        {
+            reload = Mathf.Min(totalMachineGunAmmo, ammo);
+            totalMachineGunAmmo -= reload;
+        }
+        gun.CurAmmo += reload;
         isReloading = false;
     }
     void StopToWall()
@@ -316,24 +333,27 @@ public class Player : MonoBehaviour
             Item item = other.GetComponent<Item>();
             switch (item.Type)
             {
-                case Item.ETYPE.AMMO:
-                    totalAmmo += 10;                    
+                case ETYPE.HANDGUN_AMMO:
+                    totalHandGunAmmo += 10;                    
                     break;
-                case Item.ETYPE.COIN:
+                case ETYPE.MACHINEGUN_AMMO:
+                    totalMachineGunAmmo += 10;
+                    break;
+                case ETYPE.COIN:
                     coin += 100;
                     if (coin > maxCoin)
                     {
                         coin = maxCoin;
                     }
                     break;
-                case Item.ETYPE.GRENADE:
+                case ETYPE.GRENADE:
                     grenades[hasGrenades++].SetActive(true);                    
                     if (hasGrenades >= maxHasGrenades)
                     {
                         hasGrenades = maxHasGrenades - 1;
                     }
                     break;
-                case Item.ETYPE.HEART:
+                case ETYPE.HEART:
                     health += 1;
                     {
                         if (health > maxHealth)
