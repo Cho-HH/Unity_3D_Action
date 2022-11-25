@@ -6,7 +6,7 @@ using Redcode.Pools;
 public class Bullet : MonoBehaviour, IPoolObject
 {
     [SerializeField] private string idName;
-    [SerializeField] int damage;
+    [SerializeField] private int damage;
     private Rigidbody rb;
     private TrailRenderer trailRenderer;
 
@@ -14,6 +14,11 @@ public class Bullet : MonoBehaviour, IPoolObject
     public string IdName
     {
         get { return idName; }
+    }
+
+    public int Damage
+    {
+        get { return damage; }
     }
 
     void Awake()
@@ -29,7 +34,7 @@ public class Bullet : MonoBehaviour, IPoolObject
             return;
         }
 
-        if (other.gameObject.tag == "Floor" || other.gameObject.tag == "Wall")
+        if (other.gameObject.tag == "Floor" || other.gameObject.tag == "Wall" || other.gameObject.tag == "Enemy")
         {
             rb.velocity = Vector3.zero;
             BulletManager.instance.ReturnPool(this);

@@ -12,6 +12,8 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject[] weapons;
     [SerializeField] private GameObject[] grenades;
 
+    [SerializeField] private GameObject throwGrenade;
+
     [SerializeField] private int totalHandGunAmmo;
     [SerializeField] private int totalMachineGunAmmo;
     [SerializeField] private int coin;
@@ -39,6 +41,7 @@ public class Player : MonoBehaviour
     private bool isSwap;
     private bool fDown;
     private bool rDown; // reload
+    private bool gDown; // grenade
 
     private Vector3 moveVec;
     private float walkSpeed;
@@ -75,11 +78,13 @@ public class Player : MonoBehaviour
             return;
         }
         GetInput();
+        Turn();
         Jump();
         Interaction();
         SwapWeapon();
         Attack();
         Reload();
+        Grenade();
 
         moveVec = new Vector3(x, 0, z).normalized;
 
@@ -96,8 +101,7 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        Move();
-        Turn();
+        Move();        
 
         rigid.angularVelocity = Vector3.zero;
     }
@@ -112,6 +116,7 @@ public class Player : MonoBehaviour
         s3Down = Input.GetButtonDown("Swap3");
         fDown = Input.GetButton("Fire1");
         rDown = Input.GetButtonDown("Reload");
+        gDown = Input.GetButtonDown("Fire2");
 
         isWalk = Input.GetButton("Walk");
     }
@@ -137,7 +142,7 @@ public class Player : MonoBehaviour
         }
 
         //Å°º¸µå
-        if (x == 0 && z == 0)
+        if (x == 0 && z == 0 || moveVec == Vector3.zero)
         {
             return;
         }
@@ -262,6 +267,37 @@ public class Player : MonoBehaviour
     {
         isAttacking = false;
     }
+
+    void Grenade()
+    {
+        if (hasGrenades == 0)
+        {
+            return;
+        }
+
+        if (gDown && !isReloading && !isSwap)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, 100.0f))
+            {
+                Vector3 throwVec = hit.point - transform.position;
+                if (throwVec.magnitude > 15.0f)
+                {
+                    throwVec = throwVec.normalized * 15.0f;
+                }
+                throwVec += Vector3.up * 10.0f;
+
+                GameObject grenade = Instantiate(throwGrenade, transform.position, transform.rotation);
+                Rigidbody rb = grenade.GetComponent<Rigidbody>();
+                rb.AddForce(throwVec, ForceMode.Impulse);
+                rb.AddTorque(Vector3.back * 10.0f, ForceMode.Impulse);
+
+                hasGrenades--;
+                grenades[hasGrenades].SetActive(false);
+            }            
+        }
+    }
+
     void Reload()
     {
         if (curEquipWeapon == null || !curEquipWeapon.IsGun)
