@@ -1,22 +1,125 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private int maxHealth;
     [SerializeField] private int curHealth;
+    [SerializeField] private float detectRad;
 
     private Rigidbody rb;
     private BoxCollider boxCollider;
     private Material mat;
+    private NavMeshAgent nav;
+    [SerializeField] private Vector3 targetPos;
+    private Animator anim;
+    private bool isFindPlayer;
+    private bool isArriveDest;
+    private bool isCheck;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         boxCollider = GetComponent<BoxCollider>();
-        mat = GetComponent<MeshRenderer>().material;
+        mat = GetComponentInChildren<MeshRenderer>().material;
+        nav = GetComponent<NavMeshAgent>();        
+        anim = GetComponentInChildren<Animator>();
+        isArriveDest = true;
+        isCheck = false;
         curHealth = maxHealth;
+    }
+
+    void Update()
+    {             
+        if (isFindPlayer)
+        {
+            CancelInvoke();
+            anim.SetBool("isWalk", true);
+            nav.SetDestination(targetPos);
+        }
+        else
+        {
+            MoveRandomPosition();
+            CheckArriveDest();
+        }
+    }
+
+    void FixedUpdate()
+    {
+        CheckWall();
+        FindTarget();
+        FreezeVelocity();    
+    }
+
+    void FindTarget()
+    {
+        RaycastHit[] hits = Physics.SphereCastAll(transform.position, detectRad, Vector3.up, 0, LayerMask.GetMask("Character"));        
+        if (hits.Length > 0)
+        {
+            targetPos = hits[0].transform.position;
+            isArriveDest = true;
+            isFindPlayer = true;
+            isCheck = false;
+            return;
+        }
+        isFindPlayer = false;        
+    }
+
+    void MoveRandomPosition()
+    {
+        if (!isArriveDest)
+        {
+            return;
+        }
+
+        Vector3 randomPos = transform.position + Random.insideUnitSphere * detectRad;
+        if (NavMesh.SamplePosition(randomPos, out NavMeshHit hit, detectRad, NavMesh.AllAreas))
+        {
+            targetPos = hit.position;
+        }
+        anim.SetBool("isWalk", true);
+        nav.SetDestination(targetPos);
+        isArriveDest = false;        
+    }
+
+    void CheckArriveDest()
+    {
+        if (isCheck)
+        {
+            return;
+        }
+
+        if (Vector3.Distance(transform.position, targetPos) < Vector3.kEpsilon)
+        {
+            anim.SetBool("isWalk", false);
+            isCheck = true;
+            Invoke("ArriveDest", 2.0f);
+        }
+    } 
+
+    void ArriveDest()
+    {
+        isArriveDest = true;
+        isCheck = false;
+    }
+
+    void CheckWall()
+    {
+        Debug.DrawRay(transform.position, transform.forward * 5.0f, Color.blue);
+        if (Physics.Raycast(transform.position, transform.forward, 5.0f, LayerMask.GetMask("Wall")))
+        {
+            Debug.Log("Check Wall");
+            isArriveDest = true;
+            isCheck = false;
+        }
+    }
+
+    void FreezeVelocity()
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;        
     }
 
     void OnTriggerEnter(Collider other)
@@ -55,6 +158,8 @@ public class Enemy : MonoBehaviour
         }
         else
         {
+            anim.SetTrigger("doDie");
+            nav.enabled = false;
             mat.color = Color.gray;
             gameObject.layer = 10;
 
@@ -73,8 +178,8 @@ public class Enemy : MonoBehaviour
                 reactVec += Vector3.up;
 
                 rb.AddForce(reactVec * 10.0f, ForceMode.Impulse);
-            }
+            }           
             Destroy(gameObject, 4.0f);
         }
-    }    
+    }
 }

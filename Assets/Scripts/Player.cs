@@ -55,6 +55,7 @@ public class Player : MonoBehaviour
 
     private Weapon curEquipWeapon;    
     private GameObject nearObj;
+    private MeshRenderer[] meshes;
     void Awake()
     {        
         isSwap = false;
@@ -68,6 +69,7 @@ public class Player : MonoBehaviour
         walkSpeed = speed;
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
+        meshes = GetComponentsInChildren<MeshRenderer>();
     }
 
     // Update is called once per frame
@@ -350,8 +352,8 @@ public class Player : MonoBehaviour
     }
     void StopToWall()
     {
-        Debug.DrawRay(transform.position, transform.forward * 5.0f, Color.blue);
-        isBorder = Physics.Raycast(transform.position, transform.forward, 5.0f, LayerMask.GetMask("Wall"));
+        Debug.DrawRay(transform.position, transform.forward, Color.blue);
+        isBorder = Physics.Raycast(transform.position, transform.forward, 1.0f, LayerMask.GetMask("Wall"));
     }
 
     void OnCollisionEnter(Collision collision)
@@ -359,6 +361,18 @@ public class Player : MonoBehaviour
         if (collision.gameObject.tag == "Floor")
         {
             isJump = false;
+        }
+        else if (collision.gameObject.tag == "Enemy")
+        {
+            health -= 10;
+            gameObject.layer = 12;
+            foreach (MeshRenderer mesh in meshes)
+            {
+                mesh.material.color = Color.grey;
+            }
+            StartCoroutine(OnDamage());
+            Vector3 reactVec = transform.position - collision.transform.position;
+            rigid.AddForce(reactVec * 5.0f, ForceMode.Impulse);
         }
     }
 
@@ -404,6 +418,19 @@ public class Player : MonoBehaviour
 
             Destroy(other.gameObject);            
         }
+        else if (other.tag == "EnemyBullet")
+        {
+            Bullet bullet = other.GetComponent<Bullet>();
+            health -= bullet.Damage;
+            gameObject.layer = 12;
+            foreach (MeshRenderer mesh in meshes)
+            {
+                mesh.material.color = Color.grey;
+            }
+            StartCoroutine(OnDamage());
+            Vector3 reactVec = transform.position - other.transform.position;
+            rigid.AddForce(reactVec * 5.0f, ForceMode.Impulse);
+        }       
     }
 
     void OnTriggerStay(Collider other)
@@ -417,5 +444,15 @@ public class Player : MonoBehaviour
     void OnTriggerExit(Collider other)
     {
         nearObj = null;
+    }
+
+    IEnumerator OnDamage()
+    {
+        yield return new WaitForSeconds(2.0f);
+        gameObject.layer = 7;
+        foreach (MeshRenderer mesh in meshes)
+        {
+            mesh.material.color = Color.white;
+        }
     }
 }
