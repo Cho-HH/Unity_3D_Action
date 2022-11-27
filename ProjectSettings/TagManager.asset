@@ -11,6 +11,7 @@ TagManager:
   - Melee
   - Bullet
   - Enemy
+  - EnemyAttack
   - EnemyBullet
   layers:
   - Default
@@ -26,7 +27,7 @@ TagManager:
   - EnemyDead
   - Floor
   - PlayerDamaged
-  - 
+  - EnemyBullet
   - 
   - 
   - 

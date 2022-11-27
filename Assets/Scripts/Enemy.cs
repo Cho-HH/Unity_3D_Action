@@ -5,44 +5,65 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField] private int attackPower;
     [SerializeField] private int maxHealth;
     [SerializeField] private int curHealth;
     [SerializeField] private float detectRad;
-
-    private Rigidbody rb;
+    [SerializeField] private float attackRad;
+    [SerializeField] private float attackRange;
+    
     private BoxCollider boxCollider;
-    private Material mat;
-    private NavMeshAgent nav;
-    [SerializeField] private Vector3 targetPos;
-    private Animator anim;
-    private bool isFindPlayer;
+    private Material mat;   
+    private Vector3 targetPos;
     private bool isArriveDest;
     private bool isCheck;
 
-    void Awake()
+    protected bool isFindPlayer;
+    protected NavMeshAgent nav;
+    protected Rigidbody rb;
+    protected Animator anim;
+    protected bool isAttack;
+    protected bool isAttacking;
+
+    public int AttackPower
+    {
+        get { return attackPower; }
+    }
+
+    protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody>();
         boxCollider = GetComponent<BoxCollider>();
         mat = GetComponentInChildren<MeshRenderer>().material;
         nav = GetComponent<NavMeshAgent>();        
-        anim = GetComponentInChildren<Animator>();
+        anim = GetComponentInChildren<Animator>();        
         isArriveDest = true;
         isCheck = false;
+        isAttack = false;
+        isAttacking = false;
         curHealth = maxHealth;
     }
 
     void Update()
     {             
-        if (isFindPlayer)
+        if (nav.enabled)
         {
-            CancelInvoke();
-            anim.SetBool("isWalk", true);
-            nav.SetDestination(targetPos);
-        }
-        else
-        {
-            MoveRandomPosition();
-            CheckArriveDest();
+            if (isAttack)
+            {
+                Attack();
+            }
+            else
+            {
+                if (isFindPlayer)
+                {
+                    ChasePlayer();
+                }
+                else
+                {
+                    MoveRandomPosition();
+                    CheckArriveDest();
+                }
+            }
         }
     }
 
@@ -52,10 +73,32 @@ public class Enemy : MonoBehaviour
         FindTarget();
         FreezeVelocity();    
     }
+    
+    void ChasePlayer()
+    {
+        CancelInvoke();
+        anim.SetBool("isWalk", true);
+        nav.SetDestination(targetPos);
+
+        RaycastHit[] hits = Physics.SphereCastAll(transform.position, attackRad, transform.forward, attackRange, LayerMask.GetMask("Character"));
+        if (hits.Length > 0)
+        {
+            isAttack = true;
+        }
+    }
 
     void FindTarget()
     {
         RaycastHit[] hits = Physics.SphereCastAll(transform.position, detectRad, Vector3.up, 0, LayerMask.GetMask("Character"));        
+        if (hits.Length > 0)
+        {
+            targetPos = hits[0].transform.position;
+            isArriveDest = true;
+            isFindPlayer = true;
+            isCheck = false;
+            return;
+        }
+        hits = Physics.SphereCastAll(transform.position, detectRad, Vector3.up, 0, LayerMask.GetMask("PlayerDamaged"));
         if (hits.Length > 0)
         {
             targetPos = hits[0].transform.position;
@@ -110,7 +153,6 @@ public class Enemy : MonoBehaviour
         Debug.DrawRay(transform.position, transform.forward * 5.0f, Color.blue);
         if (Physics.Raycast(transform.position, transform.forward, 5.0f, LayerMask.GetMask("Wall")))
         {
-            Debug.Log("Check Wall");
             isArriveDest = true;
             isCheck = false;
         }
@@ -181,5 +223,12 @@ public class Enemy : MonoBehaviour
             }           
             Destroy(gameObject, 4.0f);
         }
+    }
+
+    public virtual void Attack()
+    {
+        isAttacking = true;
+        targetPos = transform.position;
+        anim.SetBool("isAttack", true);
     }
 }

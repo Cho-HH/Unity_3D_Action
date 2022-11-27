@@ -364,7 +364,8 @@ public class Player : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Enemy")
         {
-            health -= 10;
+            Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+            health -= enemy.AttackPower;
             gameObject.layer = 12;
             foreach (MeshRenderer mesh in meshes)
             {
@@ -397,10 +398,9 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case ETYPE.GRENADE:
-                    grenades[hasGrenades++].SetActive(true);                    
-                    if (hasGrenades >= maxHasGrenades)
+                    if (hasGrenades < maxHasGrenades)
                     {
-                        hasGrenades = maxHasGrenades - 1;
+                        grenades[hasGrenades++].SetActive(true);
                     }
                     break;
                 case ETYPE.HEART:
@@ -419,8 +419,8 @@ public class Player : MonoBehaviour
             Destroy(other.gameObject);            
         }
         else if (other.tag == "EnemyBullet")
-        {
-            Bullet bullet = other.GetComponent<Bullet>();
+        {            
+            EnemyBullet bullet = other.GetComponent<EnemyBullet>();
             health -= bullet.Damage;
             gameObject.layer = 12;
             foreach (MeshRenderer mesh in meshes)

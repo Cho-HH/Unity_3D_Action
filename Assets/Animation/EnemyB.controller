@@ -211,7 +211,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: EnemyA
+  m_Name: EnemyB
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: isWalk
@@ -284,7 +284,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -6645307104455193018}
-    m_Position: {x: 660, y: 520, z: 0}
+    m_Position: {x: 590, y: 410, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -1234563036465662349}
     m_Position: {x: 340, y: 160, z: 0}
@@ -293,7 +293,7 @@ AnimatorStateMachine:
     m_Position: {x: 260, y: 460, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1807010502372883447}
-    m_Position: {x: 370, y: 320, z: 0}
+    m_Position: {x: 330, y: 320, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: -896709967293724093}
@@ -301,7 +301,7 @@ AnimatorStateMachine:
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: -30, y: 270, z: 0}
-  m_EntryPosition: {x: -10, y: 660, z: 0}
+  m_EntryPosition: {x: -90, y: 470, z: 0}
   m_ExitPosition: {x: 700, y: 280, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: -2926175916957061144}
