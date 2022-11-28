@@ -18,7 +18,7 @@ public class EnemyB : Enemy
 
     IEnumerator AttackRoutine()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.5f);
         rb.AddForce(transform.forward * 3.0f, ForceMode.Impulse);
 
         yield return new WaitForSeconds(1.0f);

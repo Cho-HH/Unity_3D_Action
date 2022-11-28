@@ -17,9 +17,8 @@ public class EnemyBullet : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
     }
-
     void FixedUpdate()
-    {        
+    {                
         rb.MovePosition(rb.position + transform.forward * 20.0f * Time.deltaTime);
     }
 

@@ -102,8 +102,8 @@ public class Enemy : MonoBehaviour
         if (hits.Length > 0)
         {
             targetPos = hits[0].transform.position;
-            isArriveDest = true;
-            isFindPlayer = true;
+                isArriveDest = true;
+                isFindPlayer = true;
             isCheck = false;
             return;
         }
@@ -228,7 +228,15 @@ public class Enemy : MonoBehaviour
     public virtual void Attack()
     {
         isAttacking = true;
-        targetPos = transform.position;
         anim.SetBool("isAttack", true);
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, detectRad);
+
+        Gizmos.color = Color.blue;        
+        Gizmos.DrawWireSphere(transform.position + transform.forward * attackRange, attackRad);
     }
 }

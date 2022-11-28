@@ -2,30 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyC : Enemy
+public class Boss : Enemy
 {
-    [SerializeField] private GameObject bullet;
-    [SerializeField] private Transform firePos;
-
-    private float initSpeed;
-
-    protected override void Awake()
+    // Start is called before the first frame update
+    void Start()
     {
-        base.Awake();
-        initSpeed = nav.speed;
+        
     }
 
-    public override void Attack()
+    // Update is called once per frame
+    void Update()
     {
         if (isAttacking)
         {
             return;
         }
 
-        base.Attack();
-        nav.speed = 0;
         StartCoroutine(AttackRoutine());
     }
+
+    public override void Attack()
+    {
+        base.Attack();
+    }
+
     IEnumerator AttackRoutine()
     {
         yield return new WaitForSeconds(0.5f);
