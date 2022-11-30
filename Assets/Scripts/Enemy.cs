@@ -12,7 +12,6 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float attackRad;
     [SerializeField] private float attackRange;
     
-    private BoxCollider boxCollider;
     private Material mat;   
     private Vector3 targetPos;
     private bool isArriveDest;
@@ -33,7 +32,6 @@ public class Enemy : MonoBehaviour
     protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        boxCollider = GetComponent<BoxCollider>();
         mat = GetComponentInChildren<MeshRenderer>().material;
         nav = GetComponent<NavMeshAgent>();        
         anim = GetComponentInChildren<Animator>();        
@@ -71,10 +69,10 @@ public class Enemy : MonoBehaviour
     {
         CheckWall();
         FindTarget();
-        FreezeVelocity();    
+        FreezeVelocity();
     }
     
-    void ChasePlayer()
+    public virtual void ChasePlayer()
     {
         CancelInvoke();
         anim.SetBool("isWalk", true);

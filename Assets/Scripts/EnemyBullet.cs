@@ -11,20 +11,21 @@ public class EnemyBullet : MonoBehaviour
         get { return damage; }
     }
 
-    Rigidbody rb;
+    protected Rigidbody rb;
 
-    void Awake()
+    public virtual void Awake()
     {
         rb = GetComponent<Rigidbody>();
     }
-    void FixedUpdate()
-    {                
+
+    public virtual void FixedUpdate()
+    {
         rb.MovePosition(rb.position + transform.forward * 20.0f * Time.deltaTime);
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Floor" || other.tag == "Wall" || other.tag == "Player")
+        if (other.tag == "Wall" || other.tag == "Player")
         {
             Destroy(gameObject);
         }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -20,9 +21,9 @@ public class Player : MonoBehaviour
     [SerializeField] private int health;
     [SerializeField] private int hasGrenades;
 
-    [SerializeField] private int maxCoin;
-    [SerializeField] private int maxHealth;
     [SerializeField] private int maxHasGrenades;
+
+    [SerializeField] private Text pressTxt;
 
     private List<GameObject> weaponList;
     private Dictionary<string, bool> weaponStates;
@@ -50,12 +51,19 @@ public class Player : MonoBehaviour
     private bool isFireReady;
     private bool isAttacking;
     private bool isReloading;
-
+    private bool isShop;
     private bool isBorder;
 
     private Weapon curEquipWeapon;    
     private GameObject nearObj;
     private MeshRenderer[] meshes;
+
+    public int Coin
+    {
+        get { return coin; }
+        set { coin = value; }
+    }
+
     void Awake()
     {        
         isSwap = false;
@@ -70,6 +78,8 @@ public class Player : MonoBehaviour
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
         meshes = GetComponentsInChildren<MeshRenderer>();
+
+        PlayerPrefs.SetInt("MaxScore", 112500);
     }
 
     // Update is called once per frame
@@ -168,26 +178,34 @@ public class Player : MonoBehaviour
         {
             if (nearObj.tag == "Weapon")
             {
+                pressTxt.enabled = false;
                 Item item = nearObj.GetComponent<Item>();     
                 foreach (string weaponName in weaponStates.Keys)
                 {
-                    if (weaponName == nearObj.name)
+                    if (weaponName + "(Clone)" == nearObj.name)
                     {
                         weaponStates[weaponName] = true;
                         foreach (GameObject weapon in weapons)
                         {
                             if (weapon.name == weaponName)
                             {
-                                weaponList.Add(weapon);
+                                weaponList.Add(weapon);                                
                                 break;
                             }
                         }
                         break;
                     }
-                }
-                
+                }                
                 Destroy(nearObj);
             }
+            else if (nearObj.tag == "Shop")
+            {
+                pressTxt.enabled = false;
+                isShop = true;
+                Shop shop = nearObj.GetComponent<Shop>();
+                shop.Enter(this);
+            }
+            
         }
     }
     void SwapWeapon()
@@ -245,7 +263,7 @@ public class Player : MonoBehaviour
     }
     void Attack()
     {
-        if (curEquipWeapon == null || isAttacking)
+        if (curEquipWeapon == null || isAttacking || isShop)
         {
             return;
         }
@@ -362,10 +380,19 @@ public class Player : MonoBehaviour
         {
             isJump = false;
         }
-        else if (collision.gameObject.tag == "Enemy")
+
+        if (collision.gameObject.tag == "Enemy" || collision.gameObject.tag == "Boss")
         {
-            Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-            health -= enemy.AttackPower;
+            if (collision.gameObject.tag == "Enemy")
+            {
+                Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+                health -= enemy.AttackPower;
+            }
+            else
+            {
+                Boss boss = collision.gameObject.GetComponent<Boss>();
+                health -= boss.AttackPower;
+            }                        
             gameObject.layer = 12;
             foreach (MeshRenderer mesh in meshes)
             {
@@ -374,7 +401,7 @@ public class Player : MonoBehaviour
             StartCoroutine(OnDamage());
             Vector3 reactVec = transform.position - collision.transform.position;
             rigid.AddForce(reactVec * 5.0f, ForceMode.Impulse);
-        }
+        }        
     }
 
     void OnTriggerEnter(Collider other)
@@ -392,10 +419,6 @@ public class Player : MonoBehaviour
                     break;
                 case ETYPE.COIN:
                     coin += 100;
-                    if (coin > maxCoin)
-                    {
-                        coin = maxCoin;
-                    }
                     break;
                 case ETYPE.GRENADE:
                     if (hasGrenades < maxHasGrenades)
@@ -405,12 +428,6 @@ public class Player : MonoBehaviour
                     break;
                 case ETYPE.HEART:
                     health += 1;
-                    {
-                        if (health > maxHealth)
-                        {
-                            health = maxHealth;
-                        }
-                    }
                     break;
                 default:
                     break;
@@ -435,15 +452,28 @@ public class Player : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.tag == "Weapon")
+        if (other.gameObject.tag == "Weapon" || other.gameObject.tag == "Shop")
         {
+            pressTxt.enabled = true;
             nearObj = other.gameObject;
         }
     }
 
     void OnTriggerExit(Collider other)
     {
-        nearObj = null;
+        if (other.gameObject.tag == "Weapon")
+        {
+            pressTxt.enabled = false;
+            nearObj = null;
+        }
+        else if (other.gameObject.tag == "Shop")
+        {
+            pressTxt.enabled = false;
+            Shop shop = nearObj.GetComponent<Shop>();
+            shop.Exit();
+            isShop = false;
+            nearObj = null;
+        }
     }
 
     IEnumerator OnDamage()
