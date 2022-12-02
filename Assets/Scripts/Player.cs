@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
     [SerializeField] private int maxHasGrenades;
 
     [SerializeField] private Text pressTxt;
-    private AudioSource audio;
+    private new AudioSource audio;
 
     private List<GameObject> weaponList;
     private Dictionary<string, bool> weaponStates;

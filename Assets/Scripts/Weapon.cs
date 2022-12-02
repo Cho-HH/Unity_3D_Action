@@ -7,7 +7,7 @@ public abstract class Weapon : MonoBehaviour
     [SerializeField] protected float rate;
     [SerializeField] private bool isGun;
 
-    protected AudioSource audio;
+    protected new AudioSource audio;
     public float Rate
     {
         get { return rate; }
