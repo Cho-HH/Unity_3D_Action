@@ -18,7 +18,6 @@ public class GunWeapon : Weapon
     [SerializeField] int curAmmo;
 
     [SerializeField] int poolNum;
-
     public EGUN_TYPE Type
     {
         get { return type; }
@@ -53,6 +52,7 @@ public class GunWeapon : Weapon
         rb.AddForce(bulletCasePos.right * rand + Vector3.up * 2.0f, ForceMode.Impulse);
         rb.AddTorque(transform.forward * 100.0f, ForceMode.Impulse);
 
+        audio.Play();
         return true;
     }
 }

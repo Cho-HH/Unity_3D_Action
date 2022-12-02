@@ -26,4 +26,9 @@ public class EnemyB : Enemy
         isAttacking = false;
         anim.SetBool("isAttack", false);        
     }
+
+    public override void decreaseCnt()
+    {
+        GameManager.Instance.EnemyBCnt--;
+    }
 }

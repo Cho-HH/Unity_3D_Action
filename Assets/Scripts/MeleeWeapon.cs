@@ -6,7 +6,7 @@ public class MeleeWeapon : Weapon
 {
     [SerializeField] protected int damage;
     [SerializeField] private BoxCollider meleeArea;
-    [SerializeField] private TrailRenderer trailEffect;    
+    [SerializeField] private TrailRenderer trailEffect;
 
     public int Damage
     {
@@ -28,6 +28,7 @@ public class MeleeWeapon : Weapon
         trailEffect.enabled = true;
        
         yield return new WaitForSeconds(0.4f);
+        audio.Play();
         trailEffect.enabled = false;
 
         yield return new WaitForSeconds(0.2f);

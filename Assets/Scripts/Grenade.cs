@@ -33,6 +33,12 @@ public class Grenade : MonoBehaviour
             hit.transform.GetComponent<Enemy>().HitByGrenade(transform.position);
         }
 
+        hits = Physics.SphereCastAll(transform.position, 15.0f, Vector3.up, 0, LayerMask.GetMask("Boss"));
+        foreach (RaycastHit hit in hits)
+        {
+            hit.transform.GetComponent<Boss>().HitByGrenade();
+        }
+
         Destroy(gameObject, 5.0f);
     }
 }

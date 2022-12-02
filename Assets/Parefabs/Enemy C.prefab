@@ -78,12 +78,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d3e1c53c8f03484899f40e15421293b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackPower: 2
+  attackPower: 7
   maxHealth: 100
   curHealth: 0
   detectRad: 25
   attackRad: 1
   attackRange: 20
+  score: 200
+  coin: {fileID: 5302419989311448401, guid: 581662d619d21d34bac08d72043619c8, type: 3}
   bullet: {fileID: 6988492982290730196, guid: ec8a822d05540b0408f00718a76d42bd, type: 3}
   firePos: {fileID: 7106612801778944513}
 --- !u!195 &7106612801650534896

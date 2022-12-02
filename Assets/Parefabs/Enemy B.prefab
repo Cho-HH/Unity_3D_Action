@@ -78,11 +78,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPower: 7
-  maxHealth: 100
+  maxHealth: 60
   curHealth: 0
   detectRad: 20
   attackRad: 1
   attackRange: 8
+  score: 150
+  coin: {fileID: 5302419989311448401, guid: 581662d619d21d34bac08d72043619c8, type: 3}
 --- !u!195 &4096599890130867426
 NavMeshAgent:
   m_ObjectHideFlags: 0

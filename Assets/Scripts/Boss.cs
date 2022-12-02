@@ -11,11 +11,13 @@ public class Boss : MonoBehaviour
     [SerializeField] private int attackPower;
     [SerializeField] private int maxHealth;
     [SerializeField] private int curHealth;
-    [SerializeField] private GameObject target;
     [SerializeField] private Transform[] firePos;
     [SerializeField] private GameObject missile;
     [SerializeField] private GameObject rock;
+    [SerializeField] private int score;
+    [SerializeField] private GameObject coin;
 
+    private GameObject target;
     private NavMeshAgent nav;
     private BoxCollider boxCollider;
     private MeshRenderer[] meshes;
@@ -30,9 +32,19 @@ public class Boss : MonoBehaviour
         get { return attackPower; }
     }
 
+    public int MaxHealth
+    {
+        get { return maxHealth; }
+    }
+
+    public int CurHealth
+    {
+        get { return curHealth; }
+    }
+
     void Awake()
     {
-        curHealth = maxHealth;
+        target = GameObject.FindGameObjectWithTag("Player");
         nav = GetComponent<NavMeshAgent>();
         boxCollider = GetComponent<BoxCollider>();
         meshes = GetComponentsInChildren<MeshRenderer>();
@@ -173,13 +185,32 @@ public class Boss : MonoBehaviour
         {
             isDie = true;
             anim.SetTrigger("doDie");
+            GameManager.Instance.EnemyDCnt--;
+            for (int i = 0; i < 6; i++)
+            {
+                Instantiate(coin, transform.position, Quaternion.identity);
+            }
             foreach (MeshRenderer mesh in meshes)
             {
                 mesh.material.color = Color.gray;
             }
             gameObject.layer = 10;
-            
+
+            Player pl = target.GetComponent<Player>();
+            pl.CurScore += score;
+
             Destroy(gameObject, 4.0f);
         }
+    }
+    public void HitByGrenade()
+    {
+        curHealth -= 100;
+        StartCoroutine(OnDamage());
+    }
+
+    public void SetHealth(int health)
+    {
+        maxHealth = health;
+        curHealth = health;
     }
 }

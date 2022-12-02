@@ -24,6 +24,7 @@ public class Player : MonoBehaviour
     [SerializeField] private int maxHasGrenades;
 
     [SerializeField] private Text pressTxt;
+    private AudioSource audio;
 
     private List<GameObject> weaponList;
     private Dictionary<string, bool> weaponStates;
@@ -35,6 +36,7 @@ public class Player : MonoBehaviour
     private float z;
     private bool isWalk;
     private bool isJump;
+    private bool isDie;
     private bool iDown;
     private bool s1Down;
     private bool s2Down;
@@ -53,8 +55,9 @@ public class Player : MonoBehaviour
     private bool isReloading;
     private bool isShop;
     private bool isBorder;
+    private int curScore;
 
-    private Weapon curEquipWeapon;    
+    private Weapon curEquipWeapon;
     private GameObject nearObj;
     private MeshRenderer[] meshes;
 
@@ -62,6 +65,37 @@ public class Player : MonoBehaviour
     {
         get { return coin; }
         set { coin = value; }
+    }
+
+    public int Health
+    {
+        get { return health; }
+    }
+
+    public int TotalHandGunAmmo
+    {
+        get { return totalHandGunAmmo; }
+    }
+
+    public int TotalMachinegunAmmo
+    {
+        get { return totalMachineGunAmmo; }
+    }
+
+    public int HasGrenades
+    {
+        get { return hasGrenades; }
+    }
+
+    public List<GameObject> WeaponList
+    {
+        get { return weaponList; }
+    }
+
+    public int CurScore
+    {
+        get { return curScore; }
+        set { curScore = value; }
     }
 
     void Awake()
@@ -78,14 +112,14 @@ public class Player : MonoBehaviour
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
         meshes = GetComponentsInChildren<MeshRenderer>();
-
-        PlayerPrefs.SetInt("MaxScore", 112500);
+        audio = GetComponent<AudioSource>();
+        PlayerPrefs.SetInt("MaxScore", 0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (isSwap || isAttacking || isReloading)
+        if (isSwap || isAttacking || isReloading || isDie)
         {
             return;
         }
@@ -108,6 +142,11 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isDie)
+        {
+            return;
+        }
+
         StopToWall();
         if (isSwap || isAttacking || isReloading)
         {
@@ -175,9 +214,14 @@ public class Player : MonoBehaviour
     void Interaction()
     {
         if (iDown && nearObj != null && !isJump)
-        {
+        {            
             if (nearObj.tag == "Weapon")
             {
+                string[] wp = nearObj.name.Split('(');
+                if (weaponStates[wp[0]] == true)
+                {
+                    return;
+                }
                 pressTxt.enabled = false;
                 Item item = nearObj.GetComponent<Item>();     
                 foreach (string weaponName in weaponStates.Keys)
@@ -189,7 +233,8 @@ public class Player : MonoBehaviour
                         {
                             if (weapon.name == weaponName)
                             {
-                                weaponList.Add(weapon);                                
+                                weaponList.Add(weapon);
+                                audio.Play();
                                 break;
                             }
                         }
@@ -408,17 +453,18 @@ public class Player : MonoBehaviour
     {
         if (other.tag == "Item")
         {
+            audio.Play();
             Item item = other.GetComponent<Item>();
             switch (item.Type)
             {
                 case ETYPE.HANDGUN_AMMO:
-                    totalHandGunAmmo += 10;                    
+                    totalHandGunAmmo += 30;                    
                     break;
                 case ETYPE.MACHINEGUN_AMMO:
-                    totalMachineGunAmmo += 10;
+                    totalMachineGunAmmo += 30;
                     break;
                 case ETYPE.COIN:
-                    coin += 100;
+                    coin += 500;
                     break;
                 case ETYPE.GRENADE:
                     if (hasGrenades < maxHasGrenades)
@@ -427,7 +473,7 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case ETYPE.HEART:
-                    health += 1;
+                    health += 15;
                     break;
                 default:
                     break;
@@ -478,11 +524,21 @@ public class Player : MonoBehaviour
 
     IEnumerator OnDamage()
     {
-        yield return new WaitForSeconds(2.0f);
-        gameObject.layer = 7;
-        foreach (MeshRenderer mesh in meshes)
+        if (health <= 0 && !isDie)
         {
-            mesh.material.color = Color.white;
+            anim.SetTrigger("doDie");
+            isDie = true;
+            gameObject.layer = 15;
+            GameManager.Instance.GameOver();            
+        }
+        else
+        {
+            yield return new WaitForSeconds(2.0f);
+            gameObject.layer = 7;
+            foreach (MeshRenderer mesh in meshes)
+            {
+                mesh.material.color = Color.white;
+            }
         }
     }
 }

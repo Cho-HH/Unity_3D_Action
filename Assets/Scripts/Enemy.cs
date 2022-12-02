@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour
 {
     [SerializeField] private int attackPower;
     [SerializeField] private int maxHealth;
@@ -11,11 +11,14 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float detectRad;
     [SerializeField] private float attackRad;
     [SerializeField] private float attackRange;
-    
+    [SerializeField] private int score;
+    [SerializeField] private GameObject coin;
+
     private Material mat;   
     private Vector3 targetPos;
     private bool isArriveDest;
     private bool isCheck;
+    private GameObject player; 
 
     protected bool isFindPlayer;
     protected NavMeshAgent nav;
@@ -31,6 +34,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Awake()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         rb = GetComponent<Rigidbody>();
         mat = GetComponentInChildren<MeshRenderer>().material;
         nav = GetComponent<NavMeshAgent>();        
@@ -202,7 +206,10 @@ public class Enemy : MonoBehaviour
             nav.enabled = false;
             mat.color = Color.gray;
             gameObject.layer = 10;
-
+            Player pl = player.GetComponent<Player>();
+            pl.CurScore += score;
+            Instantiate(coin, transform.position, Quaternion.identity);
+            decreaseCnt();
             if (isGrenade)
             {
                 reactVec = reactVec.normalized;
@@ -223,6 +230,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public abstract void decreaseCnt();
     public virtual void Attack()
     {
         isAttacking = true;

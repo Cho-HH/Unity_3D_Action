@@ -34,7 +34,7 @@ public class Bullet : MonoBehaviour, IPoolObject
             return;
         }
 
-        if (other.gameObject.tag == "Floor" || other.gameObject.tag == "Wall" || other.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Floor" || other.gameObject.tag == "Wall" || other.gameObject.tag == "Enemy" || other.tag == "Boss")
         {
             rb.velocity = Vector3.zero;
             BulletManager.instance.ReturnPool(this);

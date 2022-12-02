@@ -6,6 +6,8 @@ public abstract class Weapon : MonoBehaviour
 {
     [SerializeField] protected float rate;
     [SerializeField] private bool isGun;
+
+    protected AudioSource audio;
     public float Rate
     {
         get { return rate; }
@@ -21,6 +23,7 @@ public abstract class Weapon : MonoBehaviour
     void Awake()
     {
         anim = GetComponentInParent<Animator>();
+        audio = GetComponent<AudioSource>();
     }
     
     public abstract bool CanAttack();

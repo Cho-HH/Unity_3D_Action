@@ -30,8 +30,8 @@ TagManager:
   - Floor
   - PlayerDamaged
   - EnemyBullet
-  - 
-  - 
+  - Boss
+  - PlayerDie
   - 
   - 
   - 
